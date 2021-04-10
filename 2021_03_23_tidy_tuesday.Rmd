@@ -23,13 +23,19 @@ tt <- tt_load("2021-03-23")
 
 ```
 ```{r}
-unvotes <- tt$unvotes
+unvotes <- tt$unvotes %>% 
+  mutate(vote_number = match(vote, c("no","abstain","yes")) -2)
 
 unvotes %>% 
-    count(vote, sort = TRUE)
+    count(country, sort = TRUE)
 ```
-
-
+```{r}
+  unvotes %>% 
+  group_by(country) %>% 
+  summarize(n_votes =n(),
+           n_yes = sum(vote == "yes"),
+           pct_yes = n_yes / n_votes)
+```
 
 # Readme
 
