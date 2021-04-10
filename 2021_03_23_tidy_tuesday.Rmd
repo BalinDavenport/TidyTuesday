@@ -22,19 +22,33 @@ Dowload the weekly data and make available in the `tt` object.
 tt <- tt_load("2021-03-23")
 
 ```
-```{r}
+```{r mutate}
 unvotes <- tt$unvotes %>% 
   mutate(vote_number = match(vote, c("no","abstain","yes")) -2)
 
 unvotes %>% 
     count(country, sort = TRUE)
+unvotes %>% 
+    count(vote, vote_number)
 ```
-```{r}
-  unvotes %>% 
+```{r votes}
+by_country <- unvotes %>% 
   group_by(country) %>% 
   summarize(n_votes =n(),
            n_yes = sum(vote == "yes"),
-           pct_yes = n_yes / n_votes)
+           pct_yes = n_yes / n_votes) %>% 
+  filter(n_votes >= 100) %>% 
+  arrange(desc(pct_yes)) 
+
+by_country %>% 
+  tail(20) %>% 
+  mutate(country = fct_reorder(country, pct_yes)) %>% 
+  ggplot(aes(pct_yes, country)) +
+  geom_point(aes(size = n_votes)) +
+  scale_x_continuous(labels = percent) +
+  labs(x = "% of yes votes in UN",
+      title = "What countries voted yes the least")
+
 ```
 
 # Readme
