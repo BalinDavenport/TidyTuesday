@@ -24,7 +24,9 @@ tt <- tt_load("2021-03-23")
 ```
 ```{r mutate}
 unvotes <- tt$unvotes %>% 
-  mutate(vote_number = match(vote, c("no","abstain","yes")) -2)
+  mutate(vote_number = match(vote, c("no","abstain","yes")) -2) %>% 
+  left_join(tt$roll_calls %>% 
+              select(rcid, date, amend), by = "rcid")
 
 unvotes %>% 
     count(country, sort = TRUE)
@@ -32,16 +34,21 @@ unvotes %>%
     count(vote, vote_number)
 ```
 ```{r votes}
-by_country <- unvotes %>% 
-  group_by(country) %>% 
-  summarize(n_votes =n(),
+summarize_votes <- function(tbl, min_votes = 10) {
+  tbl %>% 
+    summarize(n_votes =n(),
            n_yes = sum(vote == "yes"),
            pct_yes = n_yes / n_votes) %>% 
-  filter(n_votes >= 100) %>% 
-  arrange(desc(pct_yes)) 
+    filter(n_votes >= min_votes) %>% 
+    arrange(desc(pct_yes)) 
+}
+
+by_country <- unvotes %>% 
+  group_by(country) %>% 
+  summarize_votes()
 
 by_country %>% 
-  tail(20) %>% 
+  slice(c(1:10, (n() - 10):n())) %>% 
   mutate(country = fct_reorder(country, pct_yes)) %>% 
   ggplot(aes(pct_yes, country)) +
   geom_point(aes(size = n_votes)) +
@@ -49,6 +56,9 @@ by_country %>%
   labs(x = "% of yes votes in UN",
       title = "What countries voted yes the least")
 
+```
+```{r}
+unvote
 ```
 
 # Readme
