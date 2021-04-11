@@ -30,13 +30,14 @@ unvotes <- tt$unvotes %>%
 
 unvotes %>% 
     count(country, sort = TRUE)
-unvotes %>% 
-    count(vote, vote_number)
+
 ```
+
+
 ```{r votes}
-summarize_votes <- function(tbl, min_votes = 10) {
+summarise_votes <- function(tbl, min_votes = 10) {
   tbl %>% 
-    summarize(n_votes =n(),
+    summarise(n_votes =n(),
            n_yes = sum(vote == "yes"),
            pct_yes = n_yes / n_votes) %>% 
     filter(n_votes >= min_votes) %>% 
@@ -45,7 +46,7 @@ summarize_votes <- function(tbl, min_votes = 10) {
 
 by_country <- unvotes %>% 
   group_by(country) %>% 
-  summarize_votes()
+  summarise_votes()
 
 by_country %>% 
   slice(c(1:10, (n() - 10):n())) %>% 
@@ -58,7 +59,30 @@ by_country %>%
 
 ```
 ```{r}
+library(lubridate)
 unvote
+
+by_year <- unvotes %>% 
+  group_by(year = year(date)) %>% 
+  summarise_votes()
+
+by_year %>% 
+  ggplot(aes(year, pct_yes))+
+  geom_line()+
+  expand_limits(y = 0)
+
+by_country_year <- unvotes %>% 
+  group_by(year = year(date),
+           country) %>% 
+  summarise_votes()
+
+by_country_year %>% 
+  filter(country %in% c("United States", "Canada", "Mali", "Israel")) %>% 
+  mutate(country = fct_reorder(country, pct_yes)) %>% 
+  ggplot(aes(year, pct_yes, colour = country))+
+  geom_line()+
+  scale_color_discrete(guide = guide_legend(reverse = TRUE))+
+  expand_limits(y = 0)
 ```
 
 # Readme
