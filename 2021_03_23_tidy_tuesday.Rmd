@@ -16,7 +16,7 @@ theme_set(theme_light())
 
 # Load the weekly Data
 
-Dowload the weekly data and make available in the `tt` object.
+Download the weekly data and make available in the `tt` object.
 
 ```{r Load}
 tt <- tt_load("2021-03-23")
