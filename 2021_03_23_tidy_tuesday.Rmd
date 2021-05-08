@@ -27,10 +27,9 @@ unvotes <- tt$unvotes %>%
   mutate(vote_number = match(vote, c("no","abstain","yes")) -2) %>% 
   left_join(tt$roll_calls %>% 
               select(rcid, date, amend), by = "rcid")
-
+  
 unvotes %>% 
     count(country, sort = TRUE)
-
 ```
 
 
